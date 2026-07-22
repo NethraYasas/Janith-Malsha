@@ -108,38 +108,83 @@
   #nav-indicator.visible{ opacity:1; }
   #nav-indicator.squish{ transform:scaleY(0.82); }
 
-  /* ---------- CURSOR: liquid glass magnifier ---------- */
+  /* ---------- CURSOR: glass magnifier ---------- */
   #liquid-cursor{
     position:fixed;
     top:0; left:0;
-    width:64px; height:64px;
-    margin-left:-32px; margin-top:-32px;
+    width:60px; height:60px;
+    margin-left:-40px; margin-top:-40px;
     border-radius:50%;
+    overflow:hidden;
     pointer-events:none;
     z-index:9999;
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.5);
+    background:rgba(255,255,255,0.04);
     box-shadow:
-      inset 0 0 12px rgba(255,255,255,0.35),
-      inset 0 -6px 10px rgba(0,0,0,0.1),
-      0 8px 24px rgba(0,0,0,0.35);
-    backdrop-filter:blur(3px) saturate(160%) contrast(1.05) brightness(1.08);
-    -webkit-backdrop-filter:blur(6px) saturate(160%) contrast(1.05) brightness(1.08);
-    transition:width .35s cubic-bezier(.34,1.56,.64,1), height .35s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;
+      inset 0 0 0 1.5px rgba(255,255,255,0.55),
+      inset 0 2px 6px rgba(255,255,255,0.35),
+      inset 0 -10px 16px rgba(0,0,0,0.18),
+      0 10px 28px rgba(0,0,0,0.4);
+    backdrop-filter:blur(0.5px) saturate(112%) contrast(1.03);
+    -webkit-backdrop-filter:blur(0.5px) saturate(112%) contrast(1.03);
+    transition:width .35s cubic-bezier(.34,1.56,.64,1), height .35s cubic-bezier(.34,1.56,.64,1),
+               margin .35s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;
     opacity:0;
     will-change:transform, width, height;
   }
-  #liquid-cursor::after{
-    content:"";
+  #lens-canvas{
     position:absolute;
-    top:10%; left:14%;
-    width:30%; height:22%;
-    border-radius:50%;
-    background:radial-gradient(rgba(255,255,255,0.8), transparent 70%);
-    filter:blur(1px);
+    inset:80;
+    width:300%;
+    height:300%;
+    display:block;
+    opacity:0;
+    transition:opacity .5s ease;
   }
-  #liquid-cursor.hovering{ width:20px; height:20px; margin-left:-28px; margin-top:-28px; }
-  #liquid-cursor.pressed{ width:40px; height:40px; margin-left:-26px; margin-top:-26px; }
+   #lens-canvas.hovering{
+    position:absolute;
+    inset:0;
+    width:0%;
+    height:0%;
+    display:block;
+    opacity:0;
+    transition:opacity .25s ease;
+  }
+  #lens-canvas.visible{ opacity:0; }
+
+  /* subtle polarized-glass tint — a faint, slowly-drifting blue/violet sheen,
+     like light catching a polarizing filter, rather than a full rainbow */
+  #liquid-cursor .lens-polarize{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:linear-gradient(125deg,
+      rgba(120,170,255,0.16) 0%,
+      rgba(190,140,255,0.10) 35%,
+      transparent 55%,
+      rgba(140,220,255,0.12) 80%,
+      rgba(180,150,255,0.14) 100%);
+    mix-blend-mode:overlay;
+    background-size:220% 220%;
+    animation:polarizeDrift 7s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes polarizeDrift{
+    0%,100%{ background-position:0% 0%; }
+    50%{ background-position:100% 100%; }
+  }
+
+  /* soft specular highlight, like curved glass catching light */
+  #liquid-cursor .lens-shine{
+    position:absolute;
+    top:8%; left:14%;
+    width:34%; height:22%;
+    border-radius:50%;
+    background:radial-gradient(rgba(255,255,255,0.85), transparent 70%);
+    filter:blur(1.5px);
+    pointer-events:none;
+  }
+  #liquid-cursor.hovering{ width:20px; height:20px; margin-left:-10px; margin-top:-10px; }
+  #liquid-cursor.pressed{ width:54px; height:54px; margin-left:-32px; margin-top:-32px; }
 
   @media (hover:none), (pointer:coarse){
     #liquid-cursor{ display:none; }
@@ -205,13 +250,12 @@
 
   .eyebrow{
     position:absolute;
-    top:100px;
+    top:120px;
     left:50%;
     transform:translateX(-50%);
     text-align:center;
     z-index:5;
     pointer-events:none;
-    margin-right: 100PX;
   }
   .eyebrow span{
     display:block;
@@ -276,6 +320,62 @@
   #card-ventilation{ top:36%; right:14%; }
   #card-quick{ top:53%; left:8%; }
   #card-aero{ top:64%; right:20%; }
+
+  /* ---------- PART CALLOUTS (disassembled-view descriptions with pointer lines) ---------- */
+  .part-callout{
+    position:absolute;
+    z-index:7;
+    padding:16px 26px;
+    border-radius:14px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    box-shadow:0 12px 30px rgba(0,0,0,0.3);
+    color:var(--text-primary);
+    font-family:var(--font-display);
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    will-change:transform, opacity;
+  }
+  #part-lines{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:6;
+    pointer-events:none;
+  }
+  #part-lines path{
+    fill:none;
+    stroke:rgba(255,255,255,0.55);
+    stroke-width:2.5;
+    vector-effect:non-scaling-stroke;
+  }
+  #part-lines .part-line-group{
+    opacity:0;
+  }
+
+  /* real DOM dot instead of an SVG <circle> — SVG circles get squashed into
+     ovals by the non-uniform (preserveAspectRatio="none") scaling used to
+     keep the connector lines gap-free on resize. A plain fixed-size div is
+     unaffected by that stretch, so it stays perfectly round at any viewport. */
+  .part-dot{
+    position:absolute;
+    top:0; left:0;
+    width:11px; height:11px;
+    margin-left:-5.5px; margin-top:-5.5px;
+    border-radius:50%;
+    background:rgba(10,12,18,0.4);
+    border:3px solid rgba(255,255,255,0.8);
+    z-index:6;
+    opacity:0;
+    pointer-events:none;
+  }
 
   .scroll-hint{
     position:absolute;
@@ -390,17 +490,151 @@
   footer .contact{ color:var(--text-muted); font-size:14px; line-height:1.8; }
   footer .contact a{ color:var(--text-primary); text-decoration:none; }
 
+  /* ---------- GALLERY SECTION ---------- */
+  .gallery-section {
+    position: relative;
+    z-index: 2;
+    background: var(--bg-deep);
+    padding: 0 0 140px 0;
+    overflow: hidden;
+  }
+  .gallery-track {
+    display: flex;
+    gap: 24px;
+    padding: 0 8vw 40px; /* added bottom padding so shadow isn't clipped */
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  .gallery-track::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+  .gallery-item {
+    position: relative;
+    flex: 0 0 auto;
+    width: 300px;
+    height: 420px;
+    border-radius: 24px;
+    overflow: hidden;
+    scroll-snap-align: center;
+    cursor: pointer;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    /* For glassmorphism isolation */
+    isolation: isolate;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  }
+  .gallery-item:hover, .gallery-item:focus {
+    transform: scale(1.05);
+    box-shadow: 0 24px 50px rgba(0,0,0,0.6);
+    z-index: 10;
+  }
+  .gallery-item::after {
+    /* Subtle overlay so text is more readable */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(5,7,13,0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .gallery-item:hover::after {
+    opacity: 1;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .gallery-item:hover img {
+    transform: scale(1.08);
+  }
+  .model-card {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2;
+  }
+  .gallery-item:hover .model-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .gallery-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: -20px;
+    position: relative;
+    z-index: 3;
+  }
+  .gallery-arrow {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--text-primary);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .gallery-arrow:hover {
+    background: rgba(255,255,255,0.15);
+    transform: scale(1.1);
+  }
+
   @media (max-width:720px){
     nav{ gap:0; padding:8px; }
     nav a{ padding:8px 12px; font-size:11.5px; }
     #card-ventilation, #card-quick, #card-aero{ font-size:11px; padding:11px 18px; }
+    
+    .gallery-item {
+      width: 240px;
+      height: 340px;
+      border-radius: 20px;
+    }
+    .model-card {
+      bottom: 16px; left: 16px; right: 16px;
+      padding: 14px;
+      font-size: 14px;
+    }
   }
 </style>
 </head>
 <body>
 
 <div id="speed-lines"></div>
-<div id="liquid-cursor"></div>
+<div id="liquid-cursor">
+  <canvas id="lens-canvas" width="200" height="200"></canvas>
+  <div class="lens-polarize"></div>
+  <div class="lens-shine"></div>
+</div>
 
 <nav>
   <div id="nav-indicator"></div>
@@ -414,7 +648,7 @@
   <div class="hero-sticky" id="home">
 
     <div class="eyebrow">
-      <span>INDEX HELMETS — QUALITY CERTIFIED PROTECTIVE HELMETS</span>
+      <span>INDEX HELMETS — ENGINEERED PROTECTION</span>
       <h1>Built for the ride.</h1>
     </div>
 
@@ -423,6 +657,36 @@
     <div class="feature-card" id="card-ventilation" data-speed="1.0">VENTILATION SYSTEM</div>
     <div class="feature-card" id="card-quick" data-speed="1.4">QUICK RELEASE SYSTEM</div>
     <div class="feature-card" id="card-aero" data-speed="0.7">AERODYNAMIC SHAPE</div>
+
+    <!-- Part descriptions shown while the helmet is disassembled, each with a
+         leader line pointing at the specific part. The dot positions (%) below
+         are approximated from the reference screenshot — nudge them to match
+         your actual footage. The line path is computed live in JS from each
+         card's real rendered edge, so it never gaps on resize. -->
+    <svg id="part-lines" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <g class="part-line-group" id="line-vision" data-dot-x="20.1" data-dot-y="43.3">
+        <path id="path-vision"/>
+      </g>
+      <g class="part-line-group" id="line-airflow" data-dot-x="68.3" data-dot-y="20.6">
+        <path id="path-airflow"/>
+      </g>
+      <g class="part-line-group" id="line-shell" data-dot-x="53.1" data-dot-y="51.7">
+        <path id="path-shell"/>
+      </g>
+      <g class="part-line-group" id="line-interior" data-dot-x="46.0" data-dot-y="84.3">
+        <path id="path-interior"/>
+      </g>
+    </svg>
+
+    <div class="part-dot" id="dot-vision"></div>
+    <div class="part-dot" id="dot-airflow"></div>
+    <div class="part-dot" id="dot-shell"></div>
+    <div class="part-dot" id="dot-interior"></div>
+
+    <div class="part-callout" id="callout-vision" style="top:32%; left:4%;">PROTECTIVE AND CLEAR VISION</div>
+    <div class="part-callout" id="callout-airflow" style="top:23%; right:6%;">BREATHABLE AND COMFORT AIR FLOW</div>
+    <div class="part-callout" id="callout-shell" style="top:54%; left:62%;">SHOCK ABSORBER SHELL</div>
+    <div class="part-callout" id="callout-interior" style="top:69%; left:20%;">WASHABLE AND COMFY INTERIOR</div>
 
     <div class="scroll-hint"><i></i>SCROLL</div>
   </div>
@@ -438,10 +702,100 @@
   </div>
 </section>
 
+<section class="gallery-section">
+  <div class="gallery-track" id="gallery-track">
+    <div class="gallery-item">
+      <img src="Helmets/482.jpg" alt="482">
+      <div class="model-card">Model 482</div>
+    </div>
+    <div class="gallery-item">
+      <img src="Helmets/431.jpg" alt="431">
+      <div class="model-card">Model 431</div>
+    </div>
+    <div class="gallery-item">
+      <img src="Helmets/431 NP.jpg" alt="431N/P">
+      <div class="model-card">Model 431N/P</div>
+    </div>
+    <div class="gallery-item">
+      <img src="Helmets/253.jpg" alt="253">
+      <div class="model-card">Model 253</div>
+    </div>
+    <div class="gallery-item">
+      <img src="Helmets/254.jpg" alt="254 without">
+      <div class="model-card">Model 254 without</div>
+    </div>
+    <div class="gallery-item">
+      <img src="Helmets/255 wihtout.jpg" alt="255 without">
+      <div class="model-card">Model 255 without</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/254paint/400/600" alt="254 paint">
+      <div class="model-card">Model 254 paint</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/255paint/400/600" alt="255 paint">
+      <div class="model-card">Model 255 paint</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/801/400/600" alt="801">
+      <div class="model-card">Model 801</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/802/400/600" alt="802">
+      <div class="model-card">Model 802</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/803PP/400/600" alt="803PP">
+      <div class="model-card">Model 803PP</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/803ABS/400/600" alt="803 ABS">
+      <div class="model-card">Model 803 ABS</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/588M/400/600" alt="588M">
+      <div class="model-card">Model 588M</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/588L/400/600" alt="588L">
+      <div class="model-card">Model 588L</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/828/400/600" alt="828">
+      <div class="model-card">Model 828</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/827/400/600" alt="827">
+      <div class="model-card">Model 827</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/423/400/600" alt="423">
+      <div class="model-card">Model 423</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/722Plain/400/600" alt="722 Plain">
+      <div class="model-card">Model 722 Plain</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/722sticker/400/600" alt="722 sticker">
+      <div class="model-card">Model 722 sticker</div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://picsum.photos/seed/827doublevisor/400/600" alt="827 double visor">
+      <div class="model-card">Model 827 double visor</div>
+    </div>
+  </div>
+
+  <div class="gallery-controls">
+    <button id="btn-prev" class="gallery-arrow" aria-label="Previous">←</button>
+    <button id="btn-next" class="gallery-arrow" aria-label="Next">→</button>
+  </div>
+</section>
+
 <footer id="contact">
   <div class="brand"><span>I</span>NDEX HELMETS</div>
   <div class="contact">
-    indexhelmets@gmail.com<br />
+    hello@indexhelmets.com<br />
     <a href="#home">Back to top ↑</a>
   </div>
 </footer>
@@ -471,11 +825,15 @@
 
 // Vegas Pro export naming: SEQ_0.png ... SEQ_378.png (no zero-padding, starts at 0)
 const FRAME_START = 0;
-const FRAME_PATH = i => `/vegas SEQ/vegas SEQ_${i}.png`;
+const FRAME_PATH = i => `vegas SEQ/vegas SEQ_${i}.png`;
 const FRAME_COUNT = 379;
 
 const heroTrack = document.getElementById('hero-track');
+const heroSticky = document.getElementById('home');
 const cards     = document.querySelectorAll('.feature-card');
+const partCallouts = document.querySelectorAll('.part-callout');
+const partLineGroups = document.querySelectorAll('.part-line-group');
+const partDots = document.querySelectorAll('.part-dot');
 
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function lerp(a,b,t){ return a + (b-a)*t; }
@@ -486,9 +844,72 @@ function segment(p, start, end){
   return clamp((p - start) / (end - start), 0, 1);
 }
 
+// Recomputes every pointer-line from the callout card's *actual rendered
+// edge* (via getBoundingClientRect) to its target dot, every time this
+// runs. Because it measures real layout instead of using guessed fixed
+// coordinates, there's never a gap — at any window size, mid-animation,
+// or mid-resize, the line always starts exactly where the card ends.
+function updatePartLines(){
+  const containerRect = heroSticky.getBoundingClientRect();
+  const w = containerRect.width, h = containerRect.height;
+  if (!w || !h) return;
+
+  partLineGroups.forEach(group => {
+    const dotXPct = parseFloat(group.dataset.dotX);
+    const dotYPct = parseFloat(group.dataset.dotY);
+    const card = document.getElementById(group.id.replace('line-', 'callout-'));
+    if (!card) return;
+
+    const cardRect = card.getBoundingClientRect();
+    const cardLeft   = cardRect.left   - containerRect.left;
+    const cardRight  = cardRect.right  - containerRect.left;
+    const cardCenterY= (cardRect.top + cardRect.bottom) / 2 - containerRect.top;
+
+    const dotX = (dotXPct / 100) * w;
+    const dotY = (dotYPct / 100) * h;
+
+    // attach from whichever card edge is nearer the dot
+    const attachX = dotX < (cardLeft + cardRight) / 2 ? cardLeft : cardRight;
+    const attachY = cardCenterY;
+
+    // convert real pixel coords -> the SVG's 0-1000 viewBox units
+    const vAX = (attachX / w) * 1000, vAY = (attachY / h) * 1000;
+    const vDX = (dotX / w) * 1000,    vDY = (dotY / h) * 1000;
+
+    const path = document.getElementById(group.id.replace('line-', 'path-'));
+    const dot  = document.getElementById(group.id.replace('line-', 'dot-'));
+    if (path) path.setAttribute('d', `M ${vAX.toFixed(2)} ${vAY.toFixed(2)} L ${vDX.toFixed(2)} ${vAY.toFixed(2)} L ${vDX.toFixed(2)} ${vDY.toFixed(2)}`);
+    if (dot){ dot.style.left = `${dotX.toFixed(1)}px`; dot.style.top = `${dotY.toFixed(1)}px`; }
+  });
+}
+
 let ticking = false;
 let targetP = 0;   // raw scroll progress (0-1)
 let smoothP = 0;   // eased progress the video actually renders at — lags behind targetP
+
+/* ---- Scroll-progress timeline for the disassembly beat ----
+   Tune these four numbers to match where disassembly / reassembly actually
+   happen in your footage:
+   - OLD_CARDS_FADE: the original 3 feature cards fade out over this range
+   - PART_CALLOUTS fade in starting at the *midpoint* of that fade, hold
+     fully visible once the old cards are gone, then fade out again once
+     reassembly begins.
+*/
+const OLD_CARDS_FADE_START = 0.55;
+const OLD_CARDS_FADE_END   = 0.85;
+
+// 1 frame of your 379-frame sequence, expressed in scroll-progress (0-1) units
+const FRAMES_TO_P = n => n / (FRAME_COUNT - 1);
+
+// Description cards + pointer lines now appear 40 frames earlier than before
+// (previous start/end were 0.70 / 0.85 — both shifted back by the same
+// amount so the fade-in keeps the same length, just starts sooner).
+const PART_FADE_IN_START   = ((OLD_CARDS_FADE_START + OLD_CARDS_FADE_END) / 2) - FRAMES_TO_P(40);
+const PART_FADE_IN_END     = OLD_CARDS_FADE_END - FRAMES_TO_P(40);
+
+// Fade-out now begins/ends 45 frames earlier than before, still a 10-frame fade
+const PART_FADE_OUT_END    = 1.00 - FRAMES_TO_P(45);
+const PART_FADE_OUT_START  = PART_FADE_OUT_END - FRAMES_TO_P(10);
 
 function render(){
   ticking = false;
@@ -498,16 +919,34 @@ function render(){
   targetP = clamp((window.scrollY - trackTop) / trackHeight, 0, 1);
   const p = targetP;
 
-  // feature cards: parallax drift in, then move away from the canvas
+  // feature cards: parallax drift in, then move away as disassembly begins
   cards.forEach(card => {
     const speed = parseFloat(card.dataset.speed) || 1;
     const driftIn  = ease(segment(p, 0.0, 0.2)) * speed;
-    const driftOut = ease(segment(p, 0.55, 0.95));
+    const driftOut = ease(segment(p, OLD_CARDS_FADE_START, OLD_CARDS_FADE_END));
     const y = lerp(24, 0, driftIn) - driftOut * 140 * speed;
     const x = driftOut * 90 * speed * (card.id.includes('quick') || card.id.includes('aero') ? -1 : 1);
     card.style.transform = `translate(${x}px, ${y}px)`;
     card.style.opacity = lerp(1, 0, driftOut);
   });
+
+  // part-description callouts + their pointer lines: fade in mid-way through
+  // the old cards leaving, hold while exploded, fade out on reassembly
+  const fadeIn  = ease(segment(p, PART_FADE_IN_START, PART_FADE_IN_END));
+  const fadeOut = ease(segment(p, PART_FADE_OUT_START, PART_FADE_OUT_END));
+  const partOpacity = clamp(fadeIn - fadeOut, 0, 1);
+  const partRise = lerp(14, 0, fadeIn); // small settle-in motion, matching the other cards
+
+  partCallouts.forEach(el => {
+    el.style.opacity = partOpacity;
+    el.style.transform = `translateY(${partRise}px)`;
+  });
+  partLineGroups.forEach(g => { g.style.opacity = partOpacity; });
+  partDots.forEach(d => { d.style.opacity = partOpacity; });
+
+  // measure AFTER the transforms/opacity above have been applied, so the
+  // lines track the cards' real current position every frame
+  updatePartLines();
 
   document.querySelector('.eyebrow').style.opacity = clamp(1 - ease(segment(p,0,0.1))*1.2, 0, 1);
 }
@@ -592,13 +1031,15 @@ function drawCurrentFrame(p){
 // and Android/iOS browser chrome (address bar) show/hide during scroll.
 let resizeTimer = null;
 function scheduleResize(){
+  updatePartLines(); // recompute immediately too, so lines track live while dragging to resize
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(resizeCanvas, 60);
+  resizeTimer = setTimeout(() => { resizeCanvas(); updatePartLines(); }, 60);
 }
 window.addEventListener('resize', scheduleResize);
 window.addEventListener('orientationchange', scheduleResize);
 
 resizeCanvas();
+updatePartLines();
 images[0].onload = () => drawFrame(0);
 render();
 
@@ -684,14 +1125,19 @@ navLinks.forEach(link => {
 });
 
 /* =========================================================================
-   CURSOR: liquid glass magnifying bubble
-   Trails the pointer with a soft elastic lag, swells over links/buttons,
-   and compresses slightly on click for a watery, tactile feel.
+   CURSOR: glass magnifier
+   Trails the pointer with a soft elastic lag. While hovering the hero video,
+   it redraws a sharp 1.5x zoomed crop of the footage directly under the
+   pointer, with a faint drifting polarized-glass tint over the top.
    ========================================================================= */
 const liquidCursor = document.getElementById('liquid-cursor');
+const lensCanvas = document.getElementById('lens-canvas');
 const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-if (isFinePointer && liquidCursor) {
+if (isFinePointer && liquidCursor && lensCanvas) {
+  const lensCtx = lensCanvas.getContext('2d');
+  const ZOOM = 1.5; // magnification factor
+
   let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
   let cursorX = mouseX, cursorY = mouseY;
   let cursorVisible = false;
@@ -711,7 +1157,7 @@ if (isFinePointer && liquidCursor) {
   window.addEventListener('mousedown', () => liquidCursor.classList.add('pressed'));
   window.addEventListener('mouseup', () => liquidCursor.classList.remove('pressed'));
 
-  const hoverTargets = 'a, button, input, .feature-card';
+  const hoverTargets = 'a, button, input, .feature-card, .gallery-item';
   document.addEventListener('mouseover', e => {
     if (e.target.closest(hoverTargets)) liquidCursor.classList.add('hovering');
   });
@@ -719,11 +1165,40 @@ if (isFinePointer && liquidCursor) {
     if (e.target.closest(hoverTargets)) liquidCursor.classList.remove('hovering');
   });
 
+  function updateLens(){
+    // `canvas` here is the live video-frame canvas created earlier in this
+    // script (id="scene"). Only magnify while it's actually on screen.
+    const rect = canvas.getBoundingClientRect();
+    const onScreen = rect.bottom > 0 && rect.top < window.innerHeight;
+
+    if (!onScreen || !canvas.width) {
+      lensCanvas.classList.remove('visible');
+      return;
+    }
+
+    // map cursor position -> canvas's internal device-pixel coordinates
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const cx = clamp((cursorX - rect.left) * scaleX, 0, canvas.width);
+    const cy = clamp((cursorY - rect.top) * scaleY, 0, canvas.height);
+
+    const sampleW = lensCanvas.width / ZOOM;
+    const sampleH = lensCanvas.height / ZOOM;
+    const sx = clamp(cx - sampleW / 2, 0, Math.max(0, canvas.width - sampleW));
+    const sy = clamp(cy - sampleH / 2, 0, Math.max(0, canvas.height - sampleH));
+
+    lensCtx.clearRect(0, 0, lensCanvas.width, lensCanvas.height);
+    lensCtx.imageSmoothingEnabled = true;
+    lensCtx.drawImage(canvas, sx, sy, sampleW, sampleH, 0, 0, lensCanvas.width, lensCanvas.height);
+    lensCanvas.classList.add('visible');
+  }
+
   function cursorLoop(){
-    // elastic lag: the bubble drifts toward the pointer rather than snapping to it
+    // elastic lag: the lens drifts toward the pointer rather than snapping to it
     cursorX += (mouseX - cursorX) * 0.16;
     cursorY += (mouseY - cursorY) * 0.16;
     liquidCursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+    updateLens();
     requestAnimationFrame(cursorLoop);
   }
   cursorLoop();
@@ -764,6 +1239,60 @@ window.addEventListener('scroll', () => {
     }
   }
 }, { passive:true });
+
+/* =========================================================================
+   GALLERY AUTO SCROLL & CONTROLS
+   ========================================================================= */
+const track = document.getElementById('gallery-track');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+if(track && btnPrev && btnNext) {
+  let autoScrollTimer;
+  const itemWidth = 324; // 300px width + 24px gap
+
+  function scrollNext() {
+    if (track.scrollLeft >= track.scrollWidth - track.clientWidth - 10) {
+      track.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: itemWidth, behavior: 'smooth' });
+    }
+  }
+
+  function scrollPrev() {
+    if (track.scrollLeft <= 10) {
+      track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+    }
+  }
+
+  function startAutoScroll() {
+    stopAutoScroll();
+    autoScrollTimer = setInterval(scrollNext, 3000);
+  }
+
+  function stopAutoScroll() {
+    clearInterval(autoScrollTimer);
+  }
+
+  btnNext.addEventListener('click', () => {
+    scrollNext();
+    startAutoScroll();
+  });
+
+  btnPrev.addEventListener('click', () => {
+    scrollPrev();
+    startAutoScroll();
+  });
+
+  track.addEventListener('mouseenter', stopAutoScroll);
+  track.addEventListener('mouseleave', startAutoScroll);
+  track.addEventListener('touchstart', stopAutoScroll, { passive: true });
+  track.addEventListener('touchend', startAutoScroll, { passive: true });
+
+  startAutoScroll();
+}
 </script>
 
 </body>
