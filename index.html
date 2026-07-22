@@ -823,9 +823,8 @@
    viewport height.
    ========================================================================= */
 
-// Vegas Pro export naming: SEQ_0.png ... SEQ_378.png (no zero-padding, starts at 0)
-const FRAME_START = 0;
-const FRAME_PATH = i => `vegas SEQ/vegas SEQ_${i}.png`;
+// Video file replacing the image sequence (assumes same 379-frame duration)
+const VIDEO_PATH = 'vegas SEQ/vegas.mp4';
 const FRAME_COUNT = 379;
 
 const heroTrack = document.getElementById('hero-track');
@@ -972,66 +971,78 @@ function playbackLoop(){
 }
 requestAnimationFrame(playbackLoop);
 
-/* ---------------- image sequence canvas ---------------- */
+/* ---------------- video scroll canvas ---------------- */
 const canvas = document.createElement('canvas');
 canvas.id = 'scene';
 canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
 document.querySelector('.stage').prepend(canvas);
 const ctx = canvas.getContext('2d');
-const images = [];
-let lastFrameIdx = 0;
 
-for (let n = 0; n < FRAME_COUNT; n++){
-  const img = new Image();
-  img.src = FRAME_PATH(n + FRAME_START);
-  images.push(img);
-}
+const video = document.createElement('video');
+video.src = VIDEO_PATH;
+video.muted = true;
+video.playsInline = true;
+video.preload = 'auto';
+video.style.display = 'none';
+document.body.appendChild(video);
 
+let videoDuration = 0;
+video.addEventListener('loadeddata', () => {
+  videoDuration = video.duration;
+  video.currentTime = 0.01;
+  resizeCanvas();
+});
+video.load();
+
+// We need to continuously draw the video if it's changing
 function resizeCanvas(){
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = canvas.clientWidth  * dpr;
   canvas.height = canvas.clientHeight * dpr;
-  drawFrame(lastFrameIdx); // redraw immediately so nothing looks stretched mid-resize
+  drawFrame(); // redraw immediately
 }
 
-function drawFrame(idx){
-  idx = clamp(idx, 0, FRAME_COUNT - 1);
-  const img = images[idx];
-  if (!img.complete || !img.naturalWidth) return;
-  lastFrameIdx = idx;
-
+function drawFrame(){
+  if (!video.videoWidth) return;
+  
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // "cover" fit: scale to fill the canvas without distorting the image,
-  // cropping whichever axis overflows — same behavior as CSS object-fit: cover
   const canvasRatio = canvas.width / canvas.height;
-  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const vidRatio = video.videoWidth / video.videoHeight;
 
   let drawWidth, drawHeight, offsetX, offsetY;
-  if (imgRatio > canvasRatio) {
+  if (vidRatio > canvasRatio) {
     drawHeight = canvas.height;
-    drawWidth  = drawHeight * imgRatio;
+    drawWidth  = drawHeight * vidRatio;
     offsetX = (canvas.width - drawWidth) / 2;
     offsetY = 0;
   } else {
     drawWidth  = canvas.width;
-    drawHeight = drawWidth / imgRatio;
+    drawHeight = drawWidth / vidRatio;
     offsetX = 0;
     offsetY = (canvas.height - drawHeight) / 2;
   }
 
-  ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
 }
+
+let isSeeking = false;
+video.addEventListener('seeked', () => {
+  isSeeking = false;
+  drawFrame();
+});
 
 function drawCurrentFrame(p){
-  drawFrame(Math.floor(p * (FRAME_COUNT - 1)));
+  if (videoDuration && !isSeeking) {
+    isSeeking = true;
+    video.currentTime = p * videoDuration * 0.999;
+  }
 }
 
-// Debounced resize/orientation handling — covers desktop window resize
-// and Android/iOS browser chrome (address bar) show/hide during scroll.
+// Debounced resize/orientation handling
 let resizeTimer = null;
 function scheduleResize(){
-  updatePartLines(); // recompute immediately too, so lines track live while dragging to resize
+  updatePartLines(); 
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => { resizeCanvas(); updatePartLines(); }, 60);
 }
@@ -1040,7 +1051,6 @@ window.addEventListener('orientationchange', scheduleResize);
 
 resizeCanvas();
 updatePartLines();
-images[0].onload = () => drawFrame(0);
 render();
 
 /* =========================================================================
