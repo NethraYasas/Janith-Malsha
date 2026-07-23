@@ -523,9 +523,11 @@
     /* For glassmorphism isolation */
     isolation: isolate;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+    margin-top: 100px;
+    margin-bottom: 50px;
   }
   .gallery-item:hover, .gallery-item:focus {
-    transform: scale(1.05);
+    transform: scale(1.25);
     box-shadow: 0 24px 50px rgba(0,0,0,0.6);
     z-index: 10;
   }
@@ -705,87 +707,52 @@
 <section class="gallery-section">
   <div class="gallery-track" id="gallery-track">
     <div class="gallery-item">
-      <img src="Helmets/482.jpg" alt="482">
+      <img src="Helmets/482.jpeg" alt="482">
       <div class="model-card">Model 482</div>
     </div>
     <div class="gallery-item">
-      <img src="Helmets/431.jpg" alt="431">
-      <div class="model-card">Model 431</div>
-    </div>
-    <div class="gallery-item">
-      <img src="Helmets/431 NP.jpg" alt="431N/P">
-      <div class="model-card">Model 431N/P</div>
-    </div>
-    <div class="gallery-item">
-      <img src="Helmets/253.jpg" alt="253">
+      <img src="Helmets/253.png" alt="253">
       <div class="model-card">Model 253</div>
     </div>
     <div class="gallery-item">
-      <img src="Helmets/254.jpg" alt="254 without">
-      <div class="model-card">Model 254 without</div>
+      <img src="Helmets/254.png" alt="254">
+      <div class="model-card">Model 254</div>
     </div>
     <div class="gallery-item">
-      <img src="Helmets/255 wihtout.jpg" alt="255 without">
-      <div class="model-card">Model 255 without</div>
+      <img src="Helmets/255.jpeg" alt="255">
+      <div class="model-card">Model 255</div>
     </div>
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/254paint/400/600" alt="254 paint">
-      <div class="model-card">Model 254 paint</div>
+      <img src="Helmets/423.jpeg" alt="423 ">
+      <div class="model-card">Model 423 </div>
     </div>
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/255paint/400/600" alt="255 paint">
-      <div class="model-card">Model 255 paint</div>
+      <img src="Helmets/431 NP.png" alt="431 N/P">
+      <div class="model-card">Model 431 N/P </div>
     </div>
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/801/400/600" alt="801">
-      <div class="model-card">Model 801</div>
+      <img src="Helmets/431.png" alt="431">
+      <div class="model-card">Model 431</div>
     </div>
+   
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/802/400/600" alt="802">
-      <div class="model-card">Model 802</div>
-    </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/803PP/400/600" alt="803PP">
-      <div class="model-card">Model 803PP</div>
-    </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/803ABS/400/600" alt="803 ABS">
-      <div class="model-card">Model 803 ABS</div>
-    </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/588M/400/600" alt="588M">
-      <div class="model-card">Model 588M</div>
-    </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/588L/400/600" alt="588L">
+      <img src="Helmets/588L.jpeg" alt="588L">
       <div class="model-card">Model 588L</div>
     </div>
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/828/400/600" alt="828">
-      <div class="model-card">Model 828</div>
+      <img src="Helmets/803pp.png" alt="803PP">
+      <div class="model-card">Model 803PP</div>
     </div>
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/827/400/600" alt="827">
+      <img src="Helmets/827.png" alt="827">
       <div class="model-card">Model 827</div>
     </div>
     <div class="gallery-item">
-      <img src="https://picsum.photos/seed/423/400/600" alt="423">
-      <div class="model-card">Model 423</div>
+      <img src="Helmets/722.png" alt="722">
+      <div class="model-card">Model 722</div>
     </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/722Plain/400/600" alt="722 Plain">
-      <div class="model-card">Model 722 Plain</div>
-    </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/722sticker/400/600" alt="722 sticker">
-      <div class="model-card">Model 722 sticker</div>
-    </div>
-    <div class="gallery-item">
-      <img src="https://picsum.photos/seed/827doublevisor/400/600" alt="827 double visor">
-      <div class="model-card">Model 827 double visor</div>
-    </div>
-  </div>
-
+  
+    
   <div class="gallery-controls">
     <button id="btn-prev" class="gallery-arrow" aria-label="Previous">←</button>
     <button id="btn-next" class="gallery-arrow" aria-label="Next">→</button>
@@ -825,7 +792,7 @@
 
 // Video file replacing the image sequence (assumes same 379-frame duration)
 const VIDEO_PATH = 'vegas SEQ/vegas.mp4';
-const FRAME_COUNT = 379;
+const FRAME_COUNT = 470;
 
 const heroTrack = document.getElementById('hero-track');
 const heroSticky = document.getElementById('home');
