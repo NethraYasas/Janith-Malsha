@@ -751,8 +751,8 @@
       <img src="Helmets/722.png" alt="722">
       <div class="model-card">Model 722</div>
     </div>
-  
-    
+  </div>
+
   <div class="gallery-controls">
     <button id="btn-prev" class="gallery-arrow" aria-label="Previous">←</button>
     <button id="btn-next" class="gallery-arrow" aria-label="Next">→</button>
@@ -782,17 +782,15 @@
 <script>
 /* =========================================================================
    SCROLL-DRIVEN HERO ANIMATION — image sequence background
-   Draws SEQ_0.png ... SEQ_378.png onto a full-bleed canvas, frame chosen
-   by scroll position. Uses a "cover" fit (like CSS object-fit: cover) so
-   the footage always keeps its original aspect ratio and never squashes,
-   regardless of viewport size or shape — including on resize and on
-   Android mobile browsers where the address bar show/hide changes the
-   viewport height.
+   Draws vegas_0.png ... vegas_47.png onto a full-bleed canvas, frame chosen
+   by scroll position (scroll-scrub, feels like a 3D turntable). Once the
+   sequence reaches its last frame it freezes there and slowly cross-fades
+   into vegas_48.png as the part-detail callout cards appear. Uses a
+   "cover" fit (like CSS object-fit: cover) so the footage always keeps
+   its original aspect ratio and never squashes, regardless of viewport
+   size or shape — including on resize and on Android mobile browsers
+   where the address bar show/hide changes the viewport height.
    ========================================================================= */
-
-// Video file replacing the image sequence (assumes same 379-frame duration)
-const VIDEO_PATH = 'vegas SEQ/vegas.mp4';
-const FRAME_COUNT = 470;
 
 const heroTrack = document.getElementById('hero-track');
 const heroSticky = document.getElementById('home');
@@ -864,18 +862,15 @@ let smoothP = 0;   // eased progress the video actually renders at — lags behi
 const OLD_CARDS_FADE_START = 0.55;
 const OLD_CARDS_FADE_END   = 0.85;
 
-// 1 frame of your 379-frame sequence, expressed in scroll-progress (0-1) units
-const FRAMES_TO_P = n => n / (FRAME_COUNT - 1);
-
-// Description cards + pointer lines now appear 40 frames earlier than before
-// (previous start/end were 0.70 / 0.85 — both shifted back by the same
-// amount so the fade-in keeps the same length, just starts sooner).
-const PART_FADE_IN_START   = ((OLD_CARDS_FADE_START + OLD_CARDS_FADE_END) / 2) - FRAMES_TO_P(40);
-const PART_FADE_IN_END     = OLD_CARDS_FADE_END - FRAMES_TO_P(40);
-
-// Fade-out now begins/ends 45 frames earlier than before, still a 10-frame fade
-const PART_FADE_OUT_END    = 1.00 - FRAMES_TO_P(45);
-const PART_FADE_OUT_START  = PART_FADE_OUT_END - FRAMES_TO_P(10);
+// Description cards + pointer lines fade in/out at these fixed points in the
+// 0-1 scroll-progress timeline (values preserved from the previous tuning
+// pass, just expressed directly instead of derived from a video frame count).
+const PART_FADE_IN_START   = 0.61471;
+const PART_FADE_IN_END     = 0.76471;
+// Cards now hold fully visible for longer (through the extra 48->63 scrub
+// plus a bit more) before they start to disappear.
+const PART_FADE_OUT_START  = 0.90;
+const PART_FADE_OUT_END    = 0.93;
 
 function render(){
   ticking = false;
@@ -938,30 +933,67 @@ function playbackLoop(){
 }
 requestAnimationFrame(playbackLoop);
 
-/* ---------------- video scroll canvas ---------------- */
+/* ---------------- image-sequence scroll canvas ---------------- */
+// Folder + filenames: vegas SEQ/vegas/vegas_0.png ... vegas_63.png
+const SEQ_PATH        = 'vegas SEQ/vegas/';
+const SEQ_FRAME_COUNT = 64;                  // vegas_0.png ... vegas_63.png
+const SEQ_LAST_FRAME  = SEQ_FRAME_COUNT - 1; // 63 — final resting frame
+
+// --- Playback timeline, in scroll-progress (0-1) terms ---
+// Phase 1: scrub 0 -> 47, finishing (and freezing) right as the old
+// feature cards start leaving.
+const SEQ_PHASE1_LAST_FRAME = 47;
+const SEQ_PHASE1_END_P      = OLD_CARDS_FADE_START; // 0.55
+
+// Freeze on frame 47 while the part-detail cards cross-fade in, then
+// cross-dissolve frame 47 -> 48 over that same fade-in window.
+const SEQ_CROSSFADE_FRAME   = SEQ_PHASE1_LAST_FRAME + 1; // 48
+const SEQ_CROSSFADE_START_P = PART_FADE_IN_START; // 0.61471
+const SEQ_CROSSFADE_END_P   = PART_FADE_IN_END;   // 0.76471
+
+// Phase 2: once the crossfade lands on frame 48, keep scrubbing forward
+// to frame 63 while the cards hold fully visible.
+const SEQ_PHASE2_START_P = SEQ_CROSSFADE_END_P; // 0.76471
+const SEQ_PHASE2_END_P   = 0.85;
+
+// Between SEQ_PHASE2_END_P and PART_FADE_OUT_START the sequence just
+// holds on frame 63 — a few extra frames'-worth of scroll where the
+// cards stay fully visible before they start to disappear.
+
+// After the cards have fully faded out, slowly cross-dissolve frame 63
+// back to frame 47, then keep scrubbing backward from 47 down to 0 for
+// the remainder of the hero's scroll track (a reverse playback "return").
+const SEQ_HOLD_END_P               = PART_FADE_OUT_END; // 0.93
+const SEQ_REVERSE_CROSSFADE_START_P = SEQ_HOLD_END_P;    // 0.93
+const SEQ_REVERSE_CROSSFADE_END_P   = 0.96;
+const SEQ_REVERSE_SCRUB_START_P     = SEQ_REVERSE_CROSSFADE_END_P; // 0.96
+const SEQ_REVERSE_SCRUB_END_P       = 1.0;
+
 const canvas = document.createElement('canvas');
 canvas.id = 'scene';
 canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
 document.querySelector('.stage').prepend(canvas);
 const ctx = canvas.getContext('2d');
 
-const video = document.createElement('video');
-video.src = VIDEO_PATH;
-video.muted = true;
-video.playsInline = true;
-video.preload = 'auto';
-video.style.display = 'none';
-document.body.appendChild(video);
+// Preload every frame 0..63
+const seqImages = new Array(SEQ_FRAME_COUNT);
+let seqReadyToRender = false;
 
-let videoDuration = 0;
-video.addEventListener('loadeddata', () => {
-  videoDuration = video.duration;
-  video.currentTime = 0.01;
-  resizeCanvas();
-});
-video.load();
+function loadSeqFrame(index, name){
+  const img = new Image();
+  img.src = `${SEQ_PATH}${name}.png`;
+  img.onload = () => {
+    if (!seqReadyToRender){ seqReadyToRender = true; resizeCanvas(); }
+    else drawFrame();
+  };
+  img.onerror = () => console.warn('Missing image-sequence frame:', img.src);
+  return img;
+}
 
-// We need to continuously draw the video if it's changing
+for (let i = 0; i < SEQ_FRAME_COUNT; i++){
+  seqImages[i] = loadSeqFrame(i, `vegas_${i}`);
+}
+
 function resizeCanvas(){
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = canvas.clientWidth  * dpr;
@@ -969,41 +1001,89 @@ function resizeCanvas(){
   drawFrame(); // redraw immediately
 }
 
-function drawFrame(){
-  if (!video.videoWidth) return;
-  
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+// Draws one image into the canvas using a "cover" fit, at the given opacity
+function drawImageCover(img, alpha){
+  if (!img || !img.naturalWidth) return;
   const canvasRatio = canvas.width / canvas.height;
-  const vidRatio = video.videoWidth / video.videoHeight;
+  const imgRatio = img.naturalWidth / img.naturalHeight;
 
   let drawWidth, drawHeight, offsetX, offsetY;
-  if (vidRatio > canvasRatio) {
+  if (imgRatio > canvasRatio) {
     drawHeight = canvas.height;
-    drawWidth  = drawHeight * vidRatio;
+    drawWidth  = drawHeight * imgRatio;
     offsetX = (canvas.width - drawWidth) / 2;
     offsetY = 0;
   } else {
     drawWidth  = canvas.width;
-    drawHeight = drawWidth / vidRatio;
+    drawHeight = drawWidth / imgRatio;
     offsetX = 0;
     offsetY = (canvas.height - drawHeight) / 2;
   }
 
-  ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  ctx.globalAlpha = 1;
 }
 
-let isSeeking = false;
-video.addEventListener('seeked', () => {
-  isSeeking = false;
-  drawFrame();
-});
+let currentFrameIdx      = 0;    // frame shown at alpha 1 (base layer)
+let currentCrossfadeIdx  = null; // frame blended on top, or null if none
+let currentCrossfadeAlpha = 0;
+
+function drawFrame(){
+  if (!canvas.width || !canvas.height) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawImageCover(seqImages[currentFrameIdx], 1);
+
+  if (currentCrossfadeIdx !== null && currentCrossfadeAlpha > 0){
+    drawImageCover(seqImages[currentCrossfadeIdx], currentCrossfadeAlpha);
+  }
+}
 
 function drawCurrentFrame(p){
-  if (videoDuration && !isSeeking) {
-    isSeeking = true;
-    video.currentTime = p * videoDuration * 0.999;
+  if (!seqReadyToRender) return;
+
+  if (p <= SEQ_PHASE1_END_P) {
+    // Phase 1: scrub 0 -> 47
+    const t = clamp(p / SEQ_PHASE1_END_P, 0, 1);
+    currentFrameIdx = Math.round(t * SEQ_PHASE1_LAST_FRAME);
+    currentCrossfadeIdx = null;
+    currentCrossfadeAlpha = 0;
+
+  } else if (p <= SEQ_CROSSFADE_END_P) {
+    // Frozen on 47, cross-dissolving into 48
+    currentFrameIdx = SEQ_PHASE1_LAST_FRAME;
+    currentCrossfadeIdx = SEQ_CROSSFADE_FRAME;
+    currentCrossfadeAlpha = segment(p, SEQ_CROSSFADE_START_P, SEQ_CROSSFADE_END_P);
+
+  } else if (p <= SEQ_PHASE2_END_P) {
+    // Phase 2: scrub 48 -> 63
+    const t = segment(p, SEQ_PHASE2_START_P, SEQ_PHASE2_END_P);
+    currentFrameIdx = Math.round(lerp(SEQ_CROSSFADE_FRAME, SEQ_LAST_FRAME, t));
+    currentCrossfadeIdx = null;
+    currentCrossfadeAlpha = 0;
+
+  } else if (p <= SEQ_HOLD_END_P) {
+    // Hold on frame 63 while the cards stay fully visible, then fade out
+    currentFrameIdx = SEQ_LAST_FRAME;
+    currentCrossfadeIdx = null;
+    currentCrossfadeAlpha = 0;
+
+  } else if (p <= SEQ_REVERSE_CROSSFADE_END_P) {
+    // Slowly cross-dissolve back from 63 -> 47
+    currentFrameIdx = SEQ_LAST_FRAME;
+    currentCrossfadeIdx = SEQ_PHASE1_LAST_FRAME;
+    currentCrossfadeAlpha = segment(p, SEQ_REVERSE_CROSSFADE_START_P, SEQ_REVERSE_CROSSFADE_END_P);
+
+  } else {
+    // Final phase: scrub backward 47 -> 0 for the rest of the track
+    const t = segment(p, SEQ_REVERSE_SCRUB_START_P, SEQ_REVERSE_SCRUB_END_P);
+    currentFrameIdx = Math.round(lerp(SEQ_PHASE1_LAST_FRAME, 0, t));
+    currentCrossfadeIdx = null;
+    currentCrossfadeAlpha = 0;
   }
+
+  drawFrame();
 }
 
 // Debounced resize/orientation handling
@@ -1224,24 +1304,74 @@ const track = document.getElementById('gallery-track');
 const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
 
-if(track && btnPrev && btnNext) {
-  let autoScrollTimer;
-  const itemWidth = 324; // 300px width + 24px gap
+if (track && btnPrev && btnNext) {
 
-  function scrollNext() {
-    if (track.scrollLeft >= track.scrollWidth - track.clientWidth - 10) {
-      track.scrollTo({ left: 0, behavior: 'smooth' });
-    } else {
-      track.scrollBy({ left: itemWidth, behavior: 'smooth' });
+  // ---- Build a seamless loop: [clone set][original set][clone set] ----
+  const originalItems = Array.from(track.children).filter(el => el.classList.contains('gallery-item'));
+
+  originalItems.forEach(item => {
+    const clone = item.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('img').forEach(img => img.setAttribute('alt', ''));
+    track.appendChild(clone);
+  });
+  originalItems.slice().reverse().forEach(item => {
+    const clone = item.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('img').forEach(img => img.setAttribute('alt', ''));
+    track.insertBefore(clone, track.firstChild);
+  });
+
+  let setWidth = 0;
+  let autoScrollTimer;
+  let isJumping = false;
+
+  function measure() {
+    setWidth = track.scrollWidth / 3;
+  }
+
+  function getItemStep() {
+    const first = track.querySelector('.gallery-item');
+    if (!first) return 324;
+    const style = getComputedStyle(track);
+    return first.getBoundingClientRect().width + parseFloat(style.gap || 24);
+  }
+
+  // Instantly re-center scroll position into the middle (real) set
+  function jumpBy(delta) {
+    isJumping = true;
+    const prevBehavior = track.style.scrollBehavior;
+    track.style.scrollBehavior = 'auto';
+    track.scrollLeft += delta;
+    requestAnimationFrame(() => {
+      track.style.scrollBehavior = prevBehavior;
+      isJumping = false;
+    });
+  }
+
+  function centerTrack() {
+    measure();
+    const prevBehavior = track.style.scrollBehavior;
+    track.style.scrollBehavior = 'auto';
+    track.scrollLeft = setWidth;
+    requestAnimationFrame(() => { track.style.scrollBehavior = prevBehavior; });
+  }
+
+  function normalizeScroll() {
+    if (isJumping || !setWidth) return;
+    if (track.scrollLeft <= 4) {
+      jumpBy(setWidth);
+    } else if (track.scrollLeft >= setWidth * 2 - 4) {
+      jumpBy(-setWidth);
     }
   }
 
+  function scrollNext() {
+    track.scrollBy({ left: getItemStep(), behavior: 'smooth' });
+  }
+
   function scrollPrev() {
-    if (track.scrollLeft <= 10) {
-      track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
-    } else {
-      track.scrollBy({ left: -itemWidth, behavior: 'smooth' });
-    }
+    track.scrollBy({ left: -getItemStep(), behavior: 'smooth' });
   }
 
   function startAutoScroll() {
@@ -1252,6 +1382,10 @@ if(track && btnPrev && btnNext) {
   function stopAutoScroll() {
     clearInterval(autoScrollTimer);
   }
+
+  track.addEventListener('scroll', () => {
+    requestAnimationFrame(normalizeScroll);
+  }, { passive: true });
 
   btnNext.addEventListener('click', () => {
     scrollNext();
@@ -1268,7 +1402,17 @@ if(track && btnPrev && btnNext) {
   track.addEventListener('touchstart', stopAutoScroll, { passive: true });
   track.addEventListener('touchend', startAutoScroll, { passive: true });
 
-  startAutoScroll();
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(centerTrack, 150);
+  });
+
+  // Init once layout/images have settled
+  requestAnimationFrame(() => {
+    centerTrack();
+    startAutoScroll();
+  });
 }
 </script>
 
