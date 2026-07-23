@@ -6,6 +6,7 @@
 <title>Index Helmets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg-deep:#05070d;
@@ -627,6 +628,355 @@
       font-size: 14px;
     }
   }
+
+  /* =========================================================================
+     MAGAZINE INSERT — "The Factory Issue"
+     Scoped under .mag-issue so none of these rules leak onto the rest of
+     the page. Background/panel/text/rule tones are pulled from the site's
+     own --bg-deep / --bg-deep-2 / --text-primary / --text-muted / --accent-red
+     variables so this section sits flush with the page around it; the
+     magazine's own accent colors (visor red, safety green, chrome grey,
+     warm paper) are kept as-is since those carry the print-magazine identity
+     rather than acting as page background.
+     ========================================================================= */
+  .mag-issue{
+    --ink: var(--bg-deep);
+    --panel: var(--bg-deep-2);
+    --panel-2: #10141f;
+    --paper: var(--text-primary);
+    --paper-dim: var(--text-muted);
+    --visor: var(--accent-red);
+    --visor-dim:#8A2A1D;
+    --chrome:#AEB3BC;
+    --safety:#4E9E7C;
+    --rule: rgba(244,245,247,0.14);
+
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Source Sans 3', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mag-issue .display{font-family:'Big Shoulders Display', sans-serif; text-transform:uppercase;}
+  .mag-issue .mono{font-family:'IBM Plex Mono', monospace;}
+  .mag-issue a{color:inherit;}
+
+  /* ===== COVER ===== */
+  .mag-issue .cover{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:32px 6vw 48px;
+    position:relative;
+    overflow:hidden;
+    background:
+      radial-gradient(1200px 500px at 85% -10%, rgba(224,49,63,0.18), transparent 60%),
+      linear-gradient(180deg, var(--bg-deep-2) 0%, var(--bg-deep) 60%);
+    border-bottom:1px solid var(--rule);
+  }
+  .mag-issue .cover::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:6px;
+    background:repeating-linear-gradient(90deg, var(--visor) 0 28px, transparent 28px 52px);
+    opacity:0.85;
+  }
+  .mag-issue .masthead-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:24px;
+  }
+  .mag-issue .issue-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.12em;
+    color:var(--chrome);
+    padding-top:10px;
+    text-align:right;
+    line-height:1.7;
+  }
+  .mag-issue .masthead{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:900;
+    font-size:clamp(72px, 15vw, 190px);
+    line-height:0.82;
+    letter-spacing:-0.01em;
+    margin:0;
+    color:var(--paper);
+  }
+  .mag-issue .masthead span{color:var(--visor);}
+  .mag-issue .cover-mid{
+    margin-top:6vh;
+    max-width:760px;
+  }
+  .mag-issue .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.18em;
+    color:var(--visor);
+    margin-bottom:14px;
+  }
+  .mag-issue .cover-headline{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:clamp(30px, 6vw, 58px);
+    line-height:0.98;
+    text-transform:uppercase;
+    margin:0 0 18px;
+  }
+  .mag-issue .cover-sub{
+    color:var(--paper-dim);
+    font-size:18px;
+    max-width:520px;
+  }
+  .mag-issue .cover-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-top:8vh;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--chrome);
+    letter-spacing:0.06em;
+  }
+  .mag-issue .cover-footer strong{color:var(--paper);}
+
+  /* ===== SECTION SHELL ===== */
+  .mag-issue section{
+    padding:90px 6vw;
+    max-width:1180px;
+    margin:0 auto;
+    border-bottom:1px solid var(--rule);
+  }
+  .mag-issue .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    color:var(--visor);
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .mag-issue .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--visor);
+  }
+  .mag-issue h2.section-title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:900;
+    text-transform:uppercase;
+    font-size:clamp(38px, 5.5vw, 68px);
+    line-height:0.92;
+    margin:0 0 40px;
+    max-width:760px;
+  }
+
+  /* ===== FEATURE / COMPANY PARAGRAPH ===== */
+  .mag-issue .feature-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:40px;
+  }
+  .mag-issue .drop{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:900;
+    font-size:96px;
+    line-height:0.7;
+    float:left;
+    padding:6px 10px 0 0;
+    color:var(--visor);
+  }
+  .mag-issue .feature-text p{
+    font-size:19px;
+    color:var(--paper);
+    max-width:760px;
+  }
+  .mag-issue .feature-meta{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:1px;
+    background:var(--rule);
+    margin-top:44px;
+    border:1px solid var(--rule);
+  }
+  .mag-issue .feature-meta div{
+    background:var(--panel);
+    padding:20px 18px;
+  }
+  .mag-issue .feature-meta .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    color:var(--chrome);
+    margin-bottom:8px;
+  }
+  .mag-issue .feature-meta .value{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:20px;
+    text-transform:uppercase;
+  }
+
+  /* ===== PROCESS / THE LINE ===== */
+  .mag-issue .line-intro{
+    max-width:640px;
+    color:var(--paper-dim);
+    font-size:17px;
+    margin-bottom:64px;
+  }
+  .mag-issue .acts{
+    position:relative;
+  }
+  .mag-issue .act{
+    margin-bottom:70px;
+  }
+  .mag-issue .act-head{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+  }
+  .mag-issue .act-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink);
+    background:var(--act-color, var(--visor));
+    padding:4px 10px;
+    border-radius:2px;
+    letter-spacing:0.08em;
+  }
+  .mag-issue .act-title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:900;
+    text-transform:uppercase;
+    font-size:clamp(24px,3.5vw,34px);
+    letter-spacing:0.01em;
+  }
+  .mag-issue .act-sub{
+    color:var(--paper-dim);
+    font-size:14px;
+  }
+  .mag-issue .track{
+    position:relative;
+    padding-left:34px;
+    border-left:2px dashed var(--act-color, var(--visor));
+  }
+  .mag-issue .station{
+    position:relative;
+    padding:0 0 32px 22px;
+  }
+  .mag-issue .station:last-child{padding-bottom:0;}
+  .mag-issue .station::before{
+    content:"";
+    position:absolute;
+    left:-42px;
+    top:4px;
+    width:12px; height:12px;
+    background:var(--ink);
+    border:2px solid var(--act-color, var(--visor));
+    border-radius:50%;
+  }
+  .mag-issue .station-row{
+    display:flex;
+    gap:16px;
+    align-items:baseline;
+    flex-wrap:wrap;
+  }
+  .mag-issue .station-id{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--act-color, var(--visor));
+    min-width:52px;
+  }
+  .mag-issue .station-name{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:22px;
+    text-transform:uppercase;
+  }
+  .mag-issue .station-desc{
+    color:var(--paper-dim);
+    font-size:15.5px;
+    margin-top:4px;
+    max-width:620px;
+  }
+
+  .mag-issue .act--finish{ --act-color:#E4432A; }
+  .mag-issue .act--protect{ --act-color:#4E9E7C; }
+  .mag-issue .act--ship{ --act-color:#AEB3BC; }
+
+  /* ===== PULL QUOTE ===== */
+  .mag-issue .pullquote{
+    padding:70px 6vw;
+    max-width:1180px;
+    margin:0 auto;
+    border-bottom:1px solid var(--rule);
+  }
+  .mag-issue .pullquote blockquote{
+    margin:0;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,4.2vw,46px);
+    line-height:1.15;
+    text-transform:uppercase;
+    color:var(--paper);
+    max-width:900px;
+  }
+  .mag-issue .pullquote blockquote span{color:var(--visor);}
+  .mag-issue .pullquote cite{
+    display:block;
+    margin-top:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-style:normal;
+    font-size:12px;
+    letter-spacing:0.1em;
+    color:var(--chrome);
+  }
+
+  /* ===== BACK / CONTACT ===== */
+  .mag-issue .back{
+    padding:80px 6vw 60px;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  .mag-issue .back-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:36px;
+  }
+  .mag-issue .back-brand{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:900;
+    font-size:clamp(44px,8vw,88px);
+    text-transform:uppercase;
+    line-height:0.85;
+  }
+  .mag-issue .back-brand span{color:var(--visor);}
+  .mag-issue .back-detail{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--chrome);
+    line-height:2;
+  }
+  .mag-issue .back-detail strong{color:var(--paper);}
+  .mag-issue .stripe-footer{
+    height:10px;
+    background:repeating-linear-gradient(90deg, var(--visor) 0 28px, transparent 28px 52px);
+    opacity:0.85;
+  }
+
+  @media (min-width:820px){
+    .mag-issue .feature-grid{grid-template-columns: 1fr;}
+  }
 </style>
 </head>
 <body>
@@ -641,9 +991,9 @@
 <nav>
   <div id="nav-indicator"></div>
   <a href="#home">Home</a>
-  <a href="#about">About us</a>
-  <a href="#contact">Contact us</a>
-  <a href="#signup" class="cta">Sign up</a>
+  <a href="#about">Our Products</a>
+  <a href="#contact">How it made</a>
+
 </nav>
 
 <div class="hero-track" id="hero-track">
@@ -759,25 +1109,200 @@
   </div>
 </section>
 
+<div class="mag-issue">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="masthead-row">
+      <h1 class="masthead">IN<span>DEX</span></h1>
+      <div class="issue-tag">
+        ISSUE No. 01<br>
+        THE FACTORY ISSUE<br>
+        PITIPANA · HOMAGAMA
+      </div>
+    </div>
+
+    <div class="cover-mid">
+      <div class="kicker">SAFETY-FOCUSED · STYLE-FOCUSED</div>
+      <h2 class="cover-headline">Built to Outrun the Ordinary Helmet</h2>
+      <p class="cover-sub">Inside Index Helmets (Pvt) Ltd — a single Sri Lankan production line where every shell is cooled, primed, painted, cushioned, and safety-checked before it ever reaches a rider.</p>
+    </div>
+
+    <div class="cover-footer">
+      <div>PRODUCED BY <strong>INDEX HELMETS (PVT) LTD</strong></div>
+      <div>MADE IN SRI LANKA — HOMAGAMA</div>
+    </div>
+  </div>
+
+  <!-- COMPANY FEATURE -->
+  <section>
+    <div class="eyebrow">The Company</div>
+    <h2 class="section-title">Two Problems, One Shell</h2>
+    <div class="feature-grid">
+      <div class="feature-text">
+        <p><span class="drop">I</span>ndex Helmets (Pvt) Ltd is a Sri Lankan helmet manufacturer running a single production line out of Pitipana, Homagama, turning raw shells into road-ready helmets without treating safety and style as a trade-off. The company works from a simple premise: a helmet only does its job if someone actually wants to wear it, so the same shell has to survive a hard impact and still be the one a rider reaches for first. That premise shapes everything that happens on the floor at Pitipana — every shell is cooled, cleaned, primed, sanded, painted, lacquered, cushioned, and checked by hand before it's boxed and shipped, a full-line process built less like a shortcut and more like a standard the company holds itself to on every unit that leaves the building.</p>
+      </div>
+      <div class="feature-meta">
+        <div>
+          <div class="label">FACTORY</div>
+          <div class="value">Pitipana, Homagama</div>
+        </div>
+        <div>
+          <div class="label">FOCUS</div>
+          <div class="value">Safety + Style</div>
+        </div>
+        <div>
+          <div class="label">MARKET</div>
+          <div class="value">Sri Lanka</div>
+        </div>
+        <div>
+          <div class="label">PROCESS</div>
+          <div class="value">Full In-House Line</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE LINE / PROCESS -->
+  <section>
+    <div class="eyebrow">The Process</div>
+    <h2 class="section-title">The Line: From Bare Shell to Boxed Helmet</h2>
+    <p class="line-intro">Seventeen stations, three acts. Nothing skips a step, and nothing moves forward without a check behind it.</p>
+
+    <div class="acts">
+
+      <!-- ACT ONE -->
+      <div class="act act--finish">
+        <div class="act-head">
+          <span class="act-num">ACT ONE</span>
+          <span class="act-title">Shell &amp; Skin</span>
+          <span class="act-sub">— where a molded shell becomes a finished surface</span>
+        </div>
+        <div class="track">
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-01</span><span class="station-name">Cool Down</span></div>
+            <div class="station-desc">Freshly molded shells pass through a wind stream that draws the heat out before anything else touches them.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-02</span><span class="station-name">Rise</span></div>
+            <div class="station-desc">Cooled shells are moved up to the upper stage, where the finishing work begins.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-03</span><span class="station-name">Clean</span></div>
+            <div class="station-desc">The surface is cleaned of dust and mold residue ahead of priming.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-04</span><span class="station-name">Dry</span></div>
+            <div class="station-desc">Shells are dried fully before any coating goes on.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-05</span><span class="station-name">Prime</span></div>
+            <div class="station-desc">A plastic primer filler is sprayed on to prep the surface and even out imperfections.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-06</span><span class="station-name">Sand</span></div>
+            <div class="station-desc">Hand-sanded until the surface runs smooth, with no trace of the primer's texture left behind.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-07</span><span class="station-name">Clean &amp; Paint</span></div>
+            <div class="station-desc">Sanding dust is cleared, then the shell is painted in its final colour.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-08</span><span class="station-name">Decal</span></div>
+            <div class="station-desc">Graphics and stickers are applied over the painted surface.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-09</span><span class="station-name">Lacquer &amp; Cure</span></div>
+            <div class="station-desc">A lacquer topcoat is applied and heat-cured, sealing the paint and graphics under a durable shine.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACT TWO -->
+      <div class="act act--protect">
+        <div class="act-head">
+          <span class="act-num">ACT TWO</span>
+          <span class="act-title">Protect &amp; Fit</span>
+          <span class="act-sub">— where the shell becomes a helmet</span>
+        </div>
+        <div class="track">
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-10</span><span class="station-name">Inspect</span></div>
+            <div class="station-desc">A full quality check and safety check before the shell is trusted with any internal fittings.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-11</span><span class="station-name">Cushion</span></div>
+            <div class="station-desc">Comfort padding and shock-absorbing cushions are fitted inside the shell.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-12</span><span class="station-name">Ear Pads</span></div>
+            <div class="station-desc">Ear-piece cushions are attached for fit and comfort.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-13</span><span class="station-name">Quick-Release</span></div>
+            <div class="station-desc">The quick-release strap system is set up and fitted to the shell.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-14</span><span class="station-name">Dry</span></div>
+            <div class="station-desc">A final drying pass before the helmet moves toward packing.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACT THREE -->
+      <div class="act act--ship">
+        <div class="act-head">
+          <span class="act-num">ACT THREE</span>
+          <span class="act-title">Seal &amp; Ship</span>
+          <span class="act-sub">— where a passed helmet becomes a boxed one</span>
+        </div>
+        <div class="track">
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-15</span><span class="station-name">Wrap &amp; Check</span></div>
+            <div class="station-desc">Each helmet is wrapped in polythene and checked once more before it's cleared to move on.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-16</span><span class="station-name">Cover</span></div>
+            <div class="station-desc">Helmets that pass are sent to the covering department for final protective covering.</div>
+          </div>
+          <div class="station">
+            <div class="station-row"><span class="station-id">ST-17</span><span class="station-name">Box</span></div>
+            <div class="station-desc">Packed into boxes, ready to leave Pitipana.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PULL QUOTE -->
+  <div class="pullquote">
+    <blockquote>Every shell that leaves this line has been checked <span>twice</span> — once for how it looks, once for what happens if it's ever tested.</blockquote>
+    <cite>INDEX HELMETS (PVT) LTD — PRODUCTION FLOOR, PITIPANA</cite>
+  </div>
+
+  <!-- BACK -->
+  <div class="back">
+    <div class="back-grid">
+      <div class="back-brand">IN<span>DEX</span> HELMETS</div>
+      <div class="back-detail">
+        <strong>FACTORY</strong> — Pitipana, Homagama, Sri Lanka<br>
+        <strong>FOCUS</strong> — Safety-first, style-forward helmets<br>
+        <strong>LINE</strong> — 17 stations, 3 acts, 1 standard
+      </div>
+    </div>
+  </div>
+  <div class="stripe-footer"></div>
+
+</div>
+
 <footer id="contact">
   <div class="brand"><span>I</span>NDEX HELMETS</div>
-  <div class="contact">
-    hello@indexhelmets.com<br />
+  
     <a href="#home">Back to top ↑</a>
   </div>
 </footer>
 
-<section class="panel" id="signup">
-  <div class="panel-inner">
-    <div class="kicker">STAY AHEAD</div>
-    <h2>Get early access to new shells.</h2>
-    <p>Join the list for release drops, colorway previews, and fit guides before they go public.</p>
-    <div class="signup-form">
-      <input type="email" placeholder="you@email.com" aria-label="Email address" />
-      <button type="button">Sign up</button>
-    </div>
-  </div>
-</section>
 
 <script>
 /* =========================================================================
